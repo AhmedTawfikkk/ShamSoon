@@ -1,35 +1,20 @@
 <?php
 
 namespace App\Http\Controllers\Api\V1;
-
+use App\Http\Requests\LoginRequest;
+use App\Http\Requests\RegisterRequest;
 use App\Models\User;
-use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
 
 class AuthController
 {
-    public function register(Request $request)
+    public function register(RegisterRequest $request)
     {
-        $validator = Validator::make($request->all(), [
-            'username' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
-            'password' => 'required|string|min:8|confirmed',
-        ]);
-        // dd( $validator);
-   
-        // Return validation errors if any
-        if ($validator->fails()) {
-            return response()->json([
-                'message' => 'Validation failed',
-                'errors' => $validator->errors(),
-            ], 422);
-        }
-
+       
         $user = User::create([
             'username' => $request->username,
             'email' => $request->email,
-            'password' => Hash::make($request->password), // Securely hash the password
+            'password' => Hash::make($request->password), 
         ]);
 
         $token = $user->createToken('authToken')->plainTextToken;
@@ -42,13 +27,8 @@ class AuthController
     
     }
 
-    public function login(Request $request)
+    public function login(LoginRequest $request)
     {
-        $request->validate([
-            'email'=>['required','string','email'],
-            'password'=>['required','string']
-
-        ]);
        
         $user=User::where('email',$request->email)->first();
         if(!$user|| !Hash::check($request->password,$user->password))
