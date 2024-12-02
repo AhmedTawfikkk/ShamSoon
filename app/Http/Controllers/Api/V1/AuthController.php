@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\V1;
 use App\Http\Requests\LoginRequest;
 use App\Http\Requests\RegisterRequest;
 use App\Models\User;
+use App\Notifications\EmailVerificationNotification;
 use Illuminate\Support\Facades\Hash;
 
 class AuthController
@@ -18,6 +19,7 @@ class AuthController
         ]);
 
         $token = $user->createToken('authToken')->plainTextToken;
+        $user->notify(new EmailVerificationNotification());
 
         return response()->json([
             'message' => 'User registered successfully',
